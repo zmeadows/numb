@@ -1,5 +1,5 @@
 #include "root.h"
-
+/*
 // FINDER BASE CLASS
 Finder::Finder(realfunc eqn, double tol, int max_iter)
     : current_iteration(0),
@@ -27,7 +27,17 @@ Bisection::Bisection(realfunc eqn, double x_min, double x_max, double tol, int m
 
 bool Bisection::iterate(void) {
     root = (a + b)/2;
-    if (b-a<tolerance) return true;
+    if (equation(root) == 0 || (b - a)/2 < tolerance) return true;
     (equation(a)*equation(root)<0) ? b = root : a = root;
     return false;
 }
+
+// NEWTON'S METHOD
+Newton::Newton(realfunc _equation, realfunc _derivative, double guess, double _tolerance, int _max_iterations)
+    : Finder(_equation, _tolerance, _max_iterations),
+      derivative(_derivative),
+      prev(guess) {}
+
+bool Newton::iterate(void) {
+    return false;
+}*/

@@ -4,7 +4,7 @@
 #include "base.h"
 #include "stdio.h"
 #include <utility>
-
+/*
 // base root-finding class that each type of root-finder inherits from
 class Finder {
   protected:
@@ -31,4 +31,14 @@ class Bisection : public Finder {
     Bisection(realfunc eqn, double x_min, double x_max,  double tol, int max_iter);
 };
 
+// newton's method
+class Newton : public Finder {
+  private:
+    bool iterate(void);
+    realfunc derivative;
+    double prev;
+  public:
+    Newton(realfunc _equation, realfunc _derivative, double guess, double _tolerance, int _max_iterations);
+};
+*/
 #endif
