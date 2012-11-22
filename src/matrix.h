@@ -1,57 +1,75 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-template <class T>
-class Vector {
+#include "base.h"
+#include "stddef.h"
+#include <map>
+
+/* base vector class which all vector class types derive from */;
+class vector_t {;
+    private:
+        const size_t dimension;
     protected:
-        const int dimension;
     public:
+        vector_t(const size_t _dimension);
 
+        virtual real_t & operator () (const size_t i) = 0;
+        virtual real_t & operator = (const vector_t &v) = 0;
+
+        size_t get_dimension(void) const { return dimension; };
+        virtual real_t sum(void) const = 0;
+        virtual real_t asum(void) const = 0;
+        virtual real_t norm(void) = 0;
+        virtual void fill(real_t c) = 0;
+        virtual void scale(real_t alpha) = 0;
 };
 
-template <class T> class SparseVector;
-template <class T> class DenseVector;
-
-template <class T>
-class SparseVector : public Vector<T> {
+class densevector_t : protected vector_t {
     private:
+        real_t *data;
     public:
+        densevector_t(const size_t _dimension, real_t *init_data);
 };
 
-template <class T>
-class DenseVector : public Vector<T> {
+class sparsevector_t : protected vector_t {
     private:
+        size_t nnonzero;
+        std::map<size_t,real_t> data;
     public:
+        sparsevector_t(
+            const size_t _dimension,
+            real_t *indices,
+            real_t *values,
+            size_t _nnonzero
+        );
+
+	size_t get_nnonzero ( void ) const {
+	    return nnonzero;
+	};
 };
 
-template <class T>
-class Matrix {
+real_t vdot(vector_t const &a, vector_t const &b);
+real_t vadd(vector_t const &a, vector_t const &b);
+
+class matrix_t {
     protected:
-        const int rows;
-        const int columns;
+        const int nrows;
+        const int ncolumns;
     public:
-        virtual void set_value(int i, int j, T val) = 0;
-        virtual T get_value(int i, int j) const = 0;
+        virtual real_t & operator () (const size_t i, const size_t j) = 0;
+        virtual void fill (const real_t c) = 0;
+        virtual void scale (const real_t alpha) = 0;
 };
 
-template <class T> class SparseMatrix;
-template <class T> class DenseMatrix;
-
-template <class T>
-class SparseMatrix : public Matrix<T> {
+class sparsematrix_t : protected matrix_t {
     private:
     public:
 };
 
-template <class T>
-class DenseMatrix : public Matrix<T> {
+class densematrix_t : protected matrix_t {
     private:
-        T *data;
     public:
-
 };
 
-template <class T> SparseMatrix<T> *compress(DenseMatrix<T> &A);
-template <class T> DenseMatrix<T> *decompress(SparseMatrix<T> &A);
 
 #endif
