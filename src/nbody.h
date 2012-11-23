@@ -3,6 +3,11 @@
 
 #include "base.h"
 #include "stddef.h"
+#include "stdlib.h"
+#include "time.h"
+#include "float.h"
+#include "stdio.h"
+#include "math.h"
 
 /* nbody simulator using fourth order hermite integration */
 class nbody_solver {
@@ -46,6 +51,12 @@ public:
             real_t *init_pos,
             real_t *init_vel,
             real_t *init_mass
+            );
+
+    nbody_solver(
+            const size_t _DIM,
+            const size_t _N,
+            const real_t _dt_param
             );
     ~nbody_solver(void);
 

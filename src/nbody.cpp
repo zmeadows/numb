@@ -1,7 +1,4 @@
 #include "nbody.h"
-#include "float.h"
-#include "math.h"
-#include "stdio.h"
 
 nbody_solver::nbody_solver(
     const size_t _DIM,
@@ -13,38 +10,81 @@ nbody_solver::nbody_solver(
     : DIM(_DIM),
       N(_N),
       dt_param(_dt_param),
+      mass(new real_t[_N]),
+      pos(new real_t[_N*_DIM]),
+      vel(new real_t[_N*_DIM]),
+      acc(new real_t[_N*_DIM]),
+      jerk(new real_t[_N*_DIM]),
+      old_pos(new real_t[_N*_DIM]),
+      old_vel(new real_t[_N*_DIM]),
+      old_acc(new real_t[_N*_DIM]),
+      old_jerk(new real_t[_N*_DIM]),
       time_elapsed(0),
       steps_taken(0)
 {
-    mass = new real_t[_N];
-
-    pos = new real_t[_N*_DIM];
-    vel = new real_t[_N*_DIM];
-    acc = new real_t[_N*_DIM];
-    jerk = new real_t[_N*_DIM];
-
-    old_pos = new real_t[_N*_DIM];
-    old_vel = new real_t[_N*_DIM];
-    old_acc = new real_t[_N*_DIM];
-    old_jerk = new real_t[_N*_DIM];
-
     int i,k;
-    for (i = 0; i < _N; ++i) {
+    for (i = 0; i < N; ++i) {
         mass[i] = init_mass[i];
-        for (k = 0; k < _DIM; ++k) {
-            pos[i*_DIM+k] = init_pos[i*_DIM+k];
-            vel[i*_DIM+k] = init_vel[i*_DIM+k];
+        for (k = 0; k < DIM; ++k) {
+            pos[i*DIM+k] = init_pos[i*DIM+k];
+            vel[i*DIM+k] = init_vel[i*DIM+k];
         }
     }
 }
 
+nbody_solver::nbody_solver(
+    const size_t _DIM,
+    const size_t _N,
+    const real_t _dt_param)
+    : DIM(_DIM),
+      N(_N),
+      dt_param(_dt_param),
+      time_elapsed(0),
+      steps_taken(0)
+{
+
+      mass = new real_t[N];
+      pos = new real_t[N*DIM];
+      vel = new real_t[N*DIM];
+      acc = new real_t[_N*_DIM];
+      jerk = new real_t[_N*_DIM];
+      old_pos = new real_t[_N*_DIM];
+      old_vel = new real_t[_N*_DIM];
+      old_acc = new real_t[_N*_DIM];
+      old_jerk = new real_t[_N*_DIM];
+
+    srand (time(NULL));
+
+    int i,k;
+    for (i = 0; i < N; ++i) {
+        mass[i] = rand_double(1,2);
+        for (k = 0; k < DIM; ++k) {
+            real_t r = rand_double(0,5);
+            pos[i*DIM+k] = r;
+        }
+        real_t theta_v = M_PI/2 - atan(pos[i*DIM]/pos[i*DIM+1]);
+        real_t mag_v = rand_double(0,0.001);
+        vel[i*DIM] = - signum(pos[i*DIM + 1]) * cos(theta_v) * mag_v;
+        vel[i*DIM+1] = signum(pos[i*DIM + 0]) * sin(theta_v) * mag_v;
+
+        if (rand_double(0,1) > 0.5) {
+            vel[i*DIM] *= -1;
+            vel[i*DIM+1] *= -1;
+        }
+    }
+
+}
+
 nbody_solver::~nbody_solver(void) {
+    delete mass;
     delete pos;
     delete vel;
     delete acc;
+    delete jerk;
     delete old_pos;
     delete old_vel;
     delete old_acc;
+    delete old_jerk;
 }
 
 void nbody_solver::predict_step(void) {
@@ -60,7 +100,7 @@ void nbody_solver::predict_step(void) {
 void nbody_solver::evolve_step(void) {
     int i,k,q;
     for (i = 0; i < N; ++i) {
-        for (k = 0; k < N; ++k) {
+        for (k = 0; k < DIM; ++k) {
             q = i * DIM + k;
             old_pos[q] = pos[q];
             old_vel[q] = vel[q];
@@ -79,7 +119,7 @@ void nbody_solver::evolve_step(void) {
 void nbody_solver::advance_step(void) {
     int i,j,k;
     for (i = 0; i < N; ++i) {
-        for (k = 0; k < N; ++k) {
+        for (k = 0; k < DIM; ++k) {
             acc[i*DIM+k] = jerk[i*DIM+k] = 0;
         }
     }
@@ -167,19 +207,19 @@ void nbody_solver::correct_step(void) {
 }
 
 void nbody_solver::print_stats(void) {
-    printf("%.16g\t", time_elapsed);
+    // printf("%.16g\t", time_elapsed);
 
     int i,k;
     for (i = 0; i < N; ++i) {
 
-        printf("%.16g\t", mass[i]);
+        //printf("%.16g\t", mass[i]);
 
         for (k = 0; k < DIM; ++k) {
-            printf("%.16g\t", pos[k]);
+            printf("%.16g\t", pos[i*DIM+k]);
         }
-        for (k = 0; k < DIM; ++k) {
-            printf("%.16g\t", vel[k]);
-        }
+       // for (k = 0; k < DIM; ++k) {
+       //     printf("%.16g\t", vel[k]);
+       // }
     }
     printf("\n");
 }
@@ -192,6 +232,6 @@ void nbody_solver::evolve(real_t duration) {
         dt = dt_param * collision_time;
         evolve_step();
         ++steps_taken;
-        print_stats();
+        if (steps_taken % 10000 == 0) print_stats();
     }
 }
