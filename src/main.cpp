@@ -19,7 +19,6 @@ int main(void) {
     //real_t poss[10] = {1,  0, 0, 1, -1, 0,  0, -1, 0, 0};
     //real_t vels[10] = {0, -0.5, 0.5, 0,  0, 0.5, -0.5,  0, 0, 0};
     nbody_solver test(2,10,1e-4);
-    test.evolve(50);
     /*
     reals_f lorenz_equations[] = { &x_dot, &y_dot, &z_dot };
     double inits[3] = {1.0, 1.0, 1.0};

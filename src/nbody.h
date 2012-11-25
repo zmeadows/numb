@@ -38,7 +38,7 @@ private:
     void predict_step(void);
     void advance_step(void);
     void correct_step(void);
-    void evolve_step(void);
+
 
     void print_stats(void);
     void print_diagnostics(void);
@@ -60,7 +60,7 @@ public:
             );
     ~nbody_solver(void);
 
-    void evolve(real_t duration);
+    void evolve_step(void);
 };
 
 #endif
