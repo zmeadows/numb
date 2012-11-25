@@ -40,9 +40,6 @@ private:
     void correct_step(void);
 
 
-    void print_stats(void);
-    void print_diagnostics(void);
-
 public:
     nbody_solver(
             const size_t _DIM,
@@ -59,8 +56,14 @@ public:
             const real_t _dt_param
             );
     ~nbody_solver(void);
+    
+    real_t get_time_elapsed(void) const { return time_elapsed; };
+    size_t get_steps_taken(void) const { return steps_taken; };
 
     void evolve_step(void);
+    
+    void print_stats(void);
+    void print_diagnostics(void);
 };
 
 #endif
