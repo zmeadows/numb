@@ -1,6 +1,6 @@
 # Compiler
 CC = clang++
-OPTS = -g -c -Wall -pedantic -Werror -O2 -std=c++11
+OPTS = -g -c -Wall -pedantic -Werror -O2 -std=c++11 -Wextra
 
 # Project name
 PROJECT = numb

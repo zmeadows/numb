@@ -3,56 +3,74 @@
 
 #include "solver.h"
 
-// SOLVER BASE CLASS
+/* solver base class */
 Solver::Solver(
-      uint _dimension,
-      real_t (*_system)(real_t*),
-      real_t *_vars,
-      real_t _timestep,
-      const char *filename
-      ) 
-      : system(_system),
-	dimension(_dimension),
-	steps_completed(0),
-	vars(_vars),
-	temp_vars(new T[_dimension]),
-	timestep(_timestep),
-	time_elapsed(0) 
-	{  
-	}
+        const size_t _DIM,
+        reals_f *_system,
+        real_t *init_vars,
+        real_t _dt
+        )
+: DIM(_DIM),
+    system(_system),
+    steps_taken(0),
+    vars(new real_t[_DIM]),
+    temp_vars(new real_t[_DIM]),
+    dt(_dt),
+    time_elapsed(0)
+{
+    size_t i;
+    for (i = 0; i < DIM; ++i) {
+        vars[i] = init_vars[i];
+    }
+}
 
 Solver::~Solver(void) {
     delete vars;
     delete temp_vars;
 }
 
-bool Solver::advance(void) {
-    if (!(advance_internal())) return false;
-    time_elapsed += timestep;
-    ++steps_completed;
+bool Solver::advance_step(void) {
 
-    std::copy(temp_vars,temp_vars + dimension, vars);
+    if (!(advance_internal())) return false;
+    time_elapsed += dt;
+    ++steps_taken;
+
+    size_t i;
+    for (i = 0; i < DIM; ++i) {
+        vars[i] = temp_vars[i];
+    }
 
     return true;
 }
 
-RungeKutta4::RungeKutta4(
-        int _dimension,
-	real_t (*_system)(real_t*),
-        real_t *init_vars,
-        real_t _timestep,
-        const char *filename
-	)
-	: Solver<T>(_dimension, _system, init_vars, _timestep, filename)
-{
-    k = new T*[4];
-    midpoints = new T*[3];
+void Solver::print_stats(void) {
+    fprintf(stdout, "%.16g\t", time_elapsed);
+    size_t i;
+    for (i = 0; i < DIM; ++i) {
+        fprintf(stdout, "%.16g\t", vars[i]);
+    }
+    fprintf(stdout, "\n");
 
+}
+
+void Solver::print_diagnostics(void) {
+}
+
+RungeKutta4::RungeKutta4(
+        const size_t _DIM,
+        reals_f *_system,
+        real_t *_vars,
+        real_t _dt
+	    )
+	    : Solver(_DIM, _system, _vars, _dt),
+          k(new real_t*[4]),
+          midpoints(new real_t*[3])
+{
     for(int i = 0; i < 4; ++i) {
-        k[i] = new T[_dimension];
+        k[i] = new real_t[_DIM];
     }
     for(int i = 0; i < 3; ++i) {
-        midpoints[i] = new T[_dimension];
+        midpoints[i] = new real_t[_DIM];
     }
 }
 
@@ -71,36 +89,36 @@ RungeKutta4::~RungeKutta4(void) {
 
 bool RungeKutta4::advance_internal(void) {
 
-    int i;
+    size_t i;
 
     // k1
-    for (i=0;i<dimension;++i) {
-        k[0][i] = system[i](vars) * timestep;
+    for (i=0;i<DIM;++i) {
+        k[0][i] = system[i](vars) * dt;
         midpoints[0][i] = vars[i] + 0.5 * k[0][i];
     }
 
     // k2
-    for (i=0;i<dimension;++i) {
-        k[1][i] = system[i](midpoints[0]) * timestep;
+    for (i=0;i<DIM;++i) {
+        k[1][i] = system[i](midpoints[0]) * dt;
         midpoints[1][i] = vars[i] + 0.5 * k[1][i];
     }
 
     // k3
-    for (i=0;i<dimension;++i) {
-        k[2][i] = system[i](midpoints[1]) * timestep;
+    for (i=0;i<DIM;++i) {
+        k[2][i] = system[i](midpoints[1]) * dt;
         midpoints[2][i] = vars[i] + k[2][i];
     }
 
     // k4
-    for (i=0;i<dimension;++i) {
-        k[3][i] = system[i](midpoints[2]) * timestep;
+    for (i=0;i<DIM;++i) {
+        k[3][i] = system[i](midpoints[2]) * dt;
     }
 
-    for (i=0;i<dimension;++i) {
+    for (i=0;i<DIM;++i) {
         temp_vars[i] = vars[i] +
             (1.0/6.0) * (k[0][i] + 2*k[1][i] + 2*k[2][i] + k[3][i]);
     }
-    
+
     return true;
 }
 

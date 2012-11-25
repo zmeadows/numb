@@ -7,38 +7,35 @@
 /* base class that each type of solver inherits from */
 class Solver {
   protected:
-    real_t (*system)(real_t*);
-    uint dimension;
-    uint steps_completed;
+    const size_t DIM;
+    reals_f *system;
+    size_t steps_taken;
     real_t *vars;
     real_t *temp_vars;
-    real_t timestep;
+    real_t dt;
     real_t time_elapsed;
 
+    void set_dt(real_t step) { dt = step; };
     virtual bool advance_internal(void) = 0;
 
   public:
-    bool advance(void);
-    real_t time_elapsed (void) const {
-        return time_elapsed;
-    };
-    void set_timestep(real_t step) {
-        timestep = step;
-    };
+    bool advance_step(void);
+    real_t time(void) const { return time_elapsed; };
+    size_t steps(void) const { return steps_taken; };
+    void print_stats(void);
+    void print_diagnostics(void);
 
     Solver(
-        int _dimension,
-        real_t (*_system)(real_t*),
-        real_t *_vars,
-        real_t _timestep,
-        const char *filename
+        const size_t _DIM,
+        reals_f *_system,
+        real_t *init_vars,
+        real_t _dt
     );
-
     ~Solver(void);
 };
 
 /* classic RK4 solver (fourth order) */
-class RungeKutta4 : protected Solver {
+class RungeKutta4 : public Solver {
   private:
     real_t **k;
     real_t **midpoints;
@@ -46,11 +43,10 @@ class RungeKutta4 : protected Solver {
 
   public:
     RungeKutta4(
-        int _dimension,
-        real_t (*_system)(real_t*),
+        const size_t _DIM,
+        reals_f *_system,
         real_t *_vars,
-        real_t _timestep,
-        const char *filename
+        real_t _dt
     );
 
     ~RungeKutta4(void);
@@ -58,32 +54,32 @@ class RungeKutta4 : protected Solver {
 
 
 /* straight foward Euler method (first order) */
-class Euler : protected Solver {
+class Euler : public Solver {
   private:
-    void advance_internal(void);
+    bool advance_internal(void);
 
   public:
     Euler(
-        int _dimension,
+        int _DIM,
         real_t (*_system)(real_t*),
         real_t *_vars,
-        real_t _timestep,
+        real_t _dt,
         const char *filename
     );
 };
 
-// improved euler method (second order)
-class EulerImproved : protected Solver {
+/* improved euler method (second order) */
+class EulerImproved : public Solver {
   private:
     real_t *trials;
-    void advance_internal(void);
+    bool advance_internal(void);
 
   public:
     EulerImproved(
-        int _dimension,
+        int _DIM,
         real_t (*_system)(real_t*),
         real_t *init_vars,
-        real_t _timestep,
+        real_t _dt,
         const char *filename
     );
     ~EulerImproved(void);

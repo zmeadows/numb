@@ -22,7 +22,7 @@ nbody_solver::nbody_solver(
       time_elapsed(0),
       steps_taken(0)
 {
-    int i,k;
+    size_t i,k;
     for (i = 0; i < N; ++i) {
         mass[i] = init_mass[i];
         for (k = 0; k < DIM; ++k) {
@@ -39,23 +39,22 @@ nbody_solver::nbody_solver(
     : DIM(_DIM),
       N(_N),
       dt_param(_dt_param),
+      mass(new real_t[N]),
+      pos(new real_t[N*DIM]),
+      vel(new real_t[N*DIM]),
+      acc(new real_t[_N*_DIM]),
+      jerk(new real_t[_N*_DIM]),
+      old_pos(new real_t[_N*_DIM]),
+      old_vel(new real_t[_N*_DIM]),
+      old_acc(new real_t[_N*_DIM]),
+      old_jerk(new real_t[_N*_DIM]),
       time_elapsed(0),
       steps_taken(0)
+
 {
-
-      mass = new real_t[N];
-      pos = new real_t[N*DIM];
-      vel = new real_t[N*DIM];
-      acc = new real_t[_N*_DIM];
-      jerk = new real_t[_N*_DIM];
-      old_pos = new real_t[_N*_DIM];
-      old_vel = new real_t[_N*_DIM];
-      old_acc = new real_t[_N*_DIM];
-      old_jerk = new real_t[_N*_DIM];
-
     srand (time(NULL));
 
-    int i,k;
+    size_t i,k;
     for (i = 0; i < N; ++i) {
         mass[i] = rand_double(1,2);
         for (k = 0; k < DIM; ++k) {
@@ -72,7 +71,6 @@ nbody_solver::nbody_solver(
             vel[i*DIM+1] *= -1;
         }
     }
-
 }
 
 nbody_solver::~nbody_solver(void) {
@@ -88,7 +86,7 @@ nbody_solver::~nbody_solver(void) {
 }
 
 void nbody_solver::predict_step(void) {
-    int i,k;
+    size_t i,k;
     for (i = 0;i < N; ++i) {
         for (k = 0; k < DIM; ++k) {
             pos[i*DIM+k] += vel[i*DIM+k]*dt + acc[i*DIM+k]*dt*dt/2 + jerk[i*DIM+k]*dt*dt*dt/6;
@@ -98,7 +96,7 @@ void nbody_solver::predict_step(void) {
 }
 
 void nbody_solver::evolve_step(void) {
-    int i,k,q;
+    size_t i,k,q;
     for (i = 0; i < N; ++i) {
         for (k = 0; k < DIM; ++k) {
             q = i * DIM + k;
@@ -117,7 +115,7 @@ void nbody_solver::evolve_step(void) {
 }
 
 void nbody_solver::advance_step(void) {
-    int i,j,k;
+    size_t i,j,k;
     for (i = 0; i < N; ++i) {
         for (k = 0; k < DIM; ++k) {
             acc[i*DIM+k] = jerk[i*DIM+k] = 0;
@@ -196,7 +194,7 @@ void nbody_solver::advance_step(void) {
 }
 
 void nbody_solver::correct_step(void) {
-    int i,k,q;
+    size_t i,k,q;
     for (i = 0; i < N; ++i) {
         for (k = 0; k < DIM; ++k) {
             q = i * DIM + k;
@@ -209,7 +207,7 @@ void nbody_solver::correct_step(void) {
 void nbody_solver::print_stats(void) {
     // printf("%.16g\t", time_elapsed);
 
-    int i,k;
+    size_t i,k;
     for (i = 0; i < N; ++i) {
 
         //printf("%.16g\t", mass[i]);
@@ -232,6 +230,6 @@ void nbody_solver::evolve(real_t duration) {
         dt = dt_param * collision_time;
         evolve_step();
         ++steps_taken;
-        if (steps_taken % 10000 == 0) print_stats();
+        if (steps_taken % 1000 == 0) print_stats();
     }
 }
