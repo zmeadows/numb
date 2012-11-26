@@ -10,7 +10,7 @@ OBJDIR = obj
 SRCDIR = src
 
 # Libraries
-LIBS = -lm
+LIBS = -lm -lsfml-graphics -lsfml-window -lsfml-system
 
 # Files and folders
 SRCS    = $(shell find $(SRCDIR) -name '*.cpp')

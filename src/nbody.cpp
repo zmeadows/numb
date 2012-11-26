@@ -38,17 +38,17 @@ nbody_solver::nbody_solver(
     const size_t _N,
     const real_t _dt_param)
     : DIM(_DIM),
-      N(_N),
+      N(_N+1),
       dt_param(_dt_param),
       mass(new real_t[N]),
       pos(new real_t[N*DIM]),
       vel(new real_t[N*DIM]),
-      acc(new real_t[_N*_DIM]),
-      jerk(new real_t[_N*_DIM]),
-      old_pos(new real_t[_N*_DIM]),
-      old_vel(new real_t[_N*_DIM]),
-      old_acc(new real_t[_N*_DIM]),
-      old_jerk(new real_t[_N*_DIM]),
+      acc(new real_t[N*_DIM]),
+      jerk(new real_t[N*_DIM]),
+      old_pos(new real_t[N*_DIM]),
+      old_vel(new real_t[N*_DIM]),
+      old_acc(new real_t[N*_DIM]),
+      old_jerk(new real_t[N*_DIM]),
       time_elapsed(0),
       steps_taken(0)
 
@@ -56,22 +56,25 @@ nbody_solver::nbody_solver(
     srand (time(NULL));
 
     size_t i,k;
-    for (i = 0; i < N; ++i) {
-        mass[i] = rand_double(1,2);
+    for (i = 0; i < _N; ++i) {
+        mass[i] = rand_double(1,10);
         for (k = 0; k < DIM; ++k) {
-            real_t r = rand_double(0,5);
+            real_t r = rand_double(20,100);
             pos[i*DIM+k] = r;
         }
         real_t theta_v = M_PI/2 - atan(pos[i*DIM]/pos[i*DIM+1]);
-        real_t mag_v = rand_double(0,0.001);
-        vel[i*DIM] = - signum(pos[i*DIM + 1]) * cos(theta_v) * mag_v;
-        vel[i*DIM+1] = signum(pos[i*DIM + 0]) * sin(theta_v) * mag_v;
+        real_t mag_v = 200;
+        vel[i*DIM] = signum(pos[i*DIM + 1]) * cos(theta_v) * mag_v;
+        vel[i*DIM+1] = - signum(pos[i*DIM + 0]) * sin(theta_v) * mag_v;
 
-        if (rand_double(0,1) > 0.5) {
-            vel[i*DIM] *= -1;
-            vel[i*DIM+1] *= -1;
-        }
+
     }
+
+    mass[N-1] = 990000;
+    pos[DIM*(N-1)] = 45;
+    pos[DIM*(N-1)+1] = 45;
+    vel[DIM*(N-1)] = 0;
+    vel[DIM*(N-1)+1] = 0;
     advance_step();
 }
 

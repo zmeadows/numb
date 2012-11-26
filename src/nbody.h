@@ -59,11 +59,17 @@ public:
     
     real_t get_time_elapsed(void) const { return time_elapsed; };
     size_t get_steps_taken(void) const { return steps_taken; };
+    size_t get_num_bodies(void) const { return N; };
+    size_t get_dimension(void) const { return DIM; };
 
     void evolve_step(void);
     
     void print_stats(void);
     void print_diagnostics(void);
+    
+    real_t get_x_pos(size_t id) const { return pos[id*DIM]; };
+    real_t get_y_pos(size_t id) const { return pos[id*DIM + 1]; };
+    real_t get_mass(size_t id) const { return mass[id]; };
 };
 
 #endif
