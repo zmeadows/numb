@@ -7,29 +7,29 @@
 /* base class that each type of solver inherits from */
 class Solver {
   protected:
-    const size_t DIM;
-    reals_f *system;
-    size_t steps_taken;
-    real_t *vars;
-    real_t *temp_vars;
-    real_t dt;
-    real_t time_elapsed;
+    const int DIM;
+    ode_system system;
+    int steps_taken;
+    double *vars;
+    double *temp_vars;
+    double dt;
+    double time_elapsed;
 
-    void set_dt(real_t step) { dt = step; };
+    void set_dt(double step) { dt = step; };
     virtual bool advance_internal(void) = 0;
 
   public:
     bool advance_step(void);
-    real_t time(void) const { return time_elapsed; };
-    size_t steps(void) const { return steps_taken; };
+    double time(void) const { return time_elapsed; };
+    int steps(void) const { return steps_taken; };
     void print_stats(void);
     void print_diagnostics(void);
 
     Solver(
-        const size_t _DIM,
-        reals_f *_system,
-        real_t *init_vars,
-        real_t _dt
+        const int _DIM,
+        ode_system _system,
+        double *init_vars,
+        double _dt
     );
     ~Solver(void);
 };
@@ -37,16 +37,16 @@ class Solver {
 /* classic RK4 solver (fourth order) */
 class RungeKutta4 : public Solver {
   private:
-    real_t **k;
-    real_t **midpoints;
+    double **k;
+    double **midpoints;
     bool advance_internal(void);
 
   public:
     RungeKutta4(
-        const size_t _DIM,
-        reals_f *_system,
-        real_t *_vars,
-        real_t _dt
+        const int _DIM,
+        ode_system _system,
+        double *_vars,
+        double _dt
     );
 
     ~RungeKutta4(void);
@@ -61,9 +61,9 @@ class Euler : public Solver {
   public:
     Euler(
         int _DIM,
-        real_t (*_system)(real_t*),
-        real_t *_vars,
-        real_t _dt,
+        ode_system _system,
+        double *_vars,
+        double _dt,
         const char *filename
     );
 };
@@ -71,15 +71,15 @@ class Euler : public Solver {
 /* improved euler method (second order) */
 class EulerImproved : public Solver {
   private:
-    real_t *trials;
+    double *trials;
     bool advance_internal(void);
 
   public:
     EulerImproved(
         int _DIM,
-        real_t (*_system)(real_t*),
-        real_t *init_vars,
-        real_t _dt,
+        ode_system _system,
+        double *init_vars,
+        double _dt,
         const char *filename
     );
     ~EulerImproved(void);

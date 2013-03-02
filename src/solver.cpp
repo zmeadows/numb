@@ -1,51 +1,44 @@
-#ifndef SOLVER_HXX
-#define SOLVER_HXX
-
 #include "solver.h"
 
 /* solver base class */
-Solver::Solver(
-        const size_t _DIM,
-        reals_f *_system,
-        real_t *init_vars,
-        real_t _dt
-        )
-: DIM(_DIM),
+Solver::Solver( const int _DIM, ode_system _system, double *init_vars, double _dt)
+  : DIM(_DIM),
     system(_system),
     steps_taken(0),
-    vars(new real_t[_DIM]),
-    temp_vars(new real_t[_DIM]),
+    vars(new double[_DIM]),
+    temp_vars(new double[_DIM]),
     dt(_dt),
     time_elapsed(0)
 {
-    size_t i;
+    int i;
     for (i = 0; i < DIM; ++i) {
         vars[i] = init_vars[i];
     }
-}
+};
 
 Solver::~Solver(void) {
     delete vars;
     delete temp_vars;
-}
+};
 
-bool Solver::advance_step(void) {
-
+bool
+Solver::advance_step(void)
+{
     if (!(advance_internal())) return false;
     time_elapsed += dt;
     ++steps_taken;
 
-    size_t i;
+    int i;
     for (i = 0; i < DIM; ++i) {
         vars[i] = temp_vars[i];
     }
 
     return true;
-}
+};
 
 void Solver::print_stats(void) {
     fprintf(stdout, "%.16g\t", time_elapsed);
-    size_t i;
+    int i;
     for (i = 0; i < DIM; ++i) {
         fprintf(stdout, "%.16g\t", vars[i]);
     }
@@ -56,21 +49,16 @@ void Solver::print_stats(void) {
 void Solver::print_diagnostics(void) {
 }
 
-RungeKutta4::RungeKutta4(
-        const size_t _DIM,
-        reals_f *_system,
-        real_t *_vars,
-        real_t _dt
-	    )
-	    : Solver(_DIM, _system, _vars, _dt),
-          k(new real_t*[4]),
-          midpoints(new real_t*[3])
+RungeKutta4::RungeKutta4( const int _DIM, ode_system _system, double *_vars, double _dt)
+  : Solver(_DIM, _system, _vars, _dt),
+    k(new double*[4]),
+    midpoints(new double*[3])
 {
     for(int i = 0; i < 4; ++i) {
-        k[i] = new real_t[_DIM];
+        k[i] = new double[_DIM];
     }
     for(int i = 0; i < 3; ++i) {
-        midpoints[i] = new real_t[_DIM];
+        midpoints[i] = new double[_DIM];
     }
 }
 
@@ -89,7 +77,7 @@ RungeKutta4::~RungeKutta4(void) {
 
 bool RungeKutta4::advance_internal(void) {
 
-    size_t i;
+    int i;
 
     // k1
     for (i=0;i<DIM;++i) {
@@ -121,5 +109,3 @@ bool RungeKutta4::advance_internal(void) {
 
     return true;
 }
-
-#endif
