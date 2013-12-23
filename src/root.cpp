@@ -1,6 +1,6 @@
 #include "root.h"
 
-RootFinder::RootFinder(func_R_R eqn, double tol, int max_iter)
+RootFinder::RootFinder(real_f eqn, double tol, int max_iter)
     : current_iteration(0),
       max_iterations(max_iter),
       tolerance(tol),
@@ -20,7 +20,7 @@ RootFinder::find_root(void)
     return (std::make_pair(false,root));
 };
 
-Bisection::Bisection(func_R_R eqn, double x_min, double x_max, double tol, int max_iter)
+Bisection::Bisection(real_f eqn, double x_min, double x_max, double tol, int max_iter)
     : RootFinder(eqn, tol, max_iter),
       a(x_min),
       b(x_max)
@@ -36,16 +36,16 @@ Bisection::iterate(void)
     return false;
 };
 
-Newton::Newton(func_R_R _equation, func_R_R _derivative, double guess, double _tolerance, int _max_iterations)
-    : RootFinder(_equation, _tolerance, _max_iterations),
-      derivative(_derivative),
-      prev(guess)
-{
-};
-
-bool
-Newton::iterate(void)
-{
-    return false;
-};
+// Newton::Newton(real_f _equation, real_f _derivative, double guess, double _tolerance, int _max_iterations)
+//     : RootFinder(_equation, _tolerance, _max_iterations),
+//       derivative(_derivative),
+//       prev(guess)
+// {
+// };
+//
+// bool
+// Newton::iterate(void)
+// {
+//     return false;
+// };
 
